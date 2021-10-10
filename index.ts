@@ -13,13 +13,15 @@ Wechaty.instance() // Global Instance
     console.log(qrImgUrl);
   })
   .on("login", (user) => console.log(`User ${user} logged in`))
-  .on("message", (msg: Message) => {
+  .on("message", async(msg: Message) => {
     console.log(`Message: ${msg}`);
-    if (msg.text() == "#test") {
-      msg.say("hello");
+    if (msg.text() == "#one") {
+      const url = `http://api.tianapi.com/txapi/one/index?key=${config.tianXingKey}`;
+      const res: any = await axios.get(url);
+      console.log(JSON.stringify(res));
+      msg.say(res.data.newslist[0].word);
     }
-  });
-// .start();
+  }).start();
 async function main() {
   const weatherUrl = `https://devapi.qweather.com/v7/weather/3d?key=${config.weatherKey}&location=${config.location}`;
   const lifeUrl = `https://devapi.qweather.com/v7/indices/1d?key=${config.weatherKey}&location=${config.location}&type=${config.type}`;
