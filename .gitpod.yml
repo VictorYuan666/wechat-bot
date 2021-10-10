@@ -25,7 +25,7 @@ tasks:
       # WECHATY_PUPPET_SERVICE_TOKEN=XXX npm run start:puppet:service
       # WECHATY_PUPPET_PADLOCAL_TOKEN=XXX npm run start:wechat:padlocal
       # npm run start:whatsapp:web
-      npm run start:wechat:web
+      npm run start
 
 github:
   prebuilds:
