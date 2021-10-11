@@ -1,4 +1,4 @@
-import { Wechaty, Message, Contact } from "wechaty"; // import { Wechaty } from 'wechaty'
+import { Wechaty, Message, Contact } from "wechaty"; 
 import QRTerminal from "qrcode-terminal";
 import axios from "axios";
 import schedule from "node-schedule";
@@ -31,11 +31,16 @@ bot
       case "weather":
         handleWeather(msg);
         break;
+      case "fund":
+        handleFund(msg);
+        break;
       case "test":
+        await msg.say("Hello world!");
         // const contact:any = await bot.Contact.find({name: '八月'})
         // contact.say('hello')
-        const room: any = await bot.Room.find({ topic: "801" });
-        await room.say("Hello world!");
+
+        // const room: any = await bot.Room.find({ topic: "801" });
+        // await room.say("Hello world!");
         break;
       default:
         break;
@@ -65,6 +70,7 @@ async function handleEn(msg: Message) {
 
   msg.say(`${en}\n${zh}`);
 }
+
 async function handleWeather(msg?: Message) {
   // {
   //   "area": "西湖",
@@ -95,36 +101,61 @@ async function handleWeather(msg?: Message) {
   const { area, weather, highest, lowest, windsc, tips } = res.data.newslist[0];
   console.log(res);
   const text = `今日${area}区天气${weather} 最高气温:${highest} 最低气温:${lowest} 风力:${windsc}\n${tips}`;
-  if (msg) {
-    msg.say(text);
-  }
 
-  return text;
+  sendMsg(text,msg)
+}
+
+async function handleFund(msg?: Message) {
+
+  const fundCodeList = [
+    '005609', // 富国军工主题混合A
+    '002190', // 农银新能源主题
+    '004746', // 易方达上证50
+    '001631', // 天弘中证食品饮料A
+    '161725', // 招商中证白酒A
+    '320007', // 诺安成长混合
+    '003095', // 中欧医疗混合
+    '008099', // 广发价值领先混合A
+    '005827', // 易方达蓝筹混合
+    '166002', // 中欧新蓝筹A
+    '163406', // 兴全合润混合 
+    '000083', // 汇添富消费行业混合
+    '001874', // 前海开源沪港深价值精选
+    '001182', // 易方达安心回馈混合
+    '004241', // 中欧时代先锋C
+  ];
+
+  const res:any = await axios.get(` https://fundmobapi.eastmoney.com/FundMNewApi/FundMNFInfo?pageIndex=1&pageSize=11&appType=ttjj&product=EFund&plat=Android&deviceid=9e16077fca2fcr78ep0ltn98&Version=1&Fcodes=${fundCodeList.join(',')}`)
+ 
+  const fundText = res.data.Datas.map((item:any)=>{
+    return `${item.SHORTNAME} ${item.GSZZL.includes('-')?'💚':'❤️'} ${item.GSZZL}`
+  }).join('\n')
+
+  sendMsg(fundText,msg)
+
+}
+
+async function sendMsg(text:string, msg?: Message) {
+  if(msg){
+    msg.say(text);
+  }else {
+    const room: any = await bot.Room.find({ topic: "801" });
+    await room.say(text);
+  }
 }
 
 async function main() {
-  // const weatherUrl = `https://devapi.qweather.com/v7/weather/3d?key=${config.weatherKey}&location=${config.location}`;
-  // const lifeUrl = `https://devapi.qweather.com/v7/indices/1d?key=${config.weatherKey}&location=${config.location}&type=${config.type}`;
 
-  // // const url = `http://api.tianapi.com/txapi/one/index?key=${config.tianXingKey}`;
-  // const url = `http://api.tianapi.com/txapi/verse/index?key=${config.tianXingKey}`;
-  // const { data } = await axios.get(url);
-  // console.log(JSON.stringify(data));
+  schedule.scheduleJob('0 30 23 * * ?',()=>{
+    console.log('天气'+ new Date());
+    handleWeather()
+  }); 
 
-  // 定义规则
-  let rule = new schedule.RecurrenceRule();
-  // rule.second = [0, 10, 20, 30, 40, 50]; // 每隔 10 秒执行一次
-  rule.hour = 23;
-  rule.minute = 30;
-  rule.second = 0;
+  schedule.scheduleJob('0 30 6 * * ?',()=>{
+    console.log('基金' + new Date());
+    handleFund()
+  }); 
 
-  // 启动任务
-  let job = schedule.scheduleJob(rule, async () => {
-    console.log(`${"-------"}\n${new Date()}`);
-    const room: any = await bot.Room.find({ topic: "801" });
-    const weatherText = await handleWeather();
-    await room.say(weatherText);
-  });
 }
 
 main();
