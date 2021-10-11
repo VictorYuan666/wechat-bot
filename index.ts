@@ -125,7 +125,7 @@ async function handleFund(msg?: Message) {
     '004241', // 中欧时代先锋C
   ];
 
-  const res:any = await axios.get(` https://fundmobapi.eastmoney.com/FundMNewApi/FundMNFInfo?pageIndex=1&pageSize=11&appType=ttjj&product=EFund&plat=Android&deviceid=9e16077fca2fcr78ep0ltn98&Version=1&Fcodes=${fundCodeList.join(',')}`)
+  const res:any = await axios.get(` https://fundmobapi.eastmoney.com/FundMNewApi/FundMNFInfo?pageIndex=1&pageSize=100&appType=ttjj&product=EFund&plat=Android&deviceid=9e16077fca2fcr78ep0ltn98&Version=1&Fcodes=${fundCodeList.join(',')}`)
  
   const fundText = res.data.Datas.map((item:any)=>{
     return `${item.SHORTNAME} ${item.GSZZL.includes('-')?'💚':'❤️'} ${item.GSZZL}`

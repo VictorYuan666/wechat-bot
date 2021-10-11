@@ -1,1 +1,1 @@
-GET https://fundmobapi.eastmoney.com/FundMNewApi/FundMNFInfo?pageIndex=1&pageSize=11&appType=ttjj&product=EFund&plat=Android&deviceid=9e16077fca2fcr78ep0ltn98&Version=1&Fcodes=161725,320007,001632,161726,001071,007874,004857,420009,377240,002207,004855
+GET https://fundmobapi.eastmoney.com/FundMNewApi/FundMNFInfo?pageIndex=1&pageSize=100&appType=ttjj&product=EFund&plat=Android&deviceid=9e16077fca2fcr78ep0ltn98&Version=1&Fcodes=005609,002190,004746,001631,161725,320007,003095,008099,005827,166002,163406,000083,001874,001182,004241
