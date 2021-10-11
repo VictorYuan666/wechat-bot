@@ -2,6 +2,10 @@
 .idea
 .vscode
 
+.npm
+.config
+.pki
+
 node_modules
 .cache
 .nyc_output
