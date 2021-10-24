@@ -159,6 +159,12 @@ async function main() {
     await handleWeather(undefined, "today");
   });
 
+  schedule.scheduleJob("0 30 10 * * ?", async () => {
+    console.log("天气" + new Date());
+
+    await handleWeather(undefined, "tomorrow");
+  });
+
   schedule.scheduleJob("0 30 6 * * ?", () => {
     console.log("基金" + new Date());
     handleFund();
