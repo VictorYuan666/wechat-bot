@@ -1,4 +1,4 @@
-import { Wechaty, Message, Contact } from "wechaty"; 
+import { Wechaty, Message, Contact } from "wechaty";
 import QRTerminal from "qrcode-terminal";
 import axios from "axios";
 import schedule from "node-schedule";
@@ -16,6 +16,7 @@ bot
     console.log(qrImgUrl);
   })
   .on("login", (user) => console.log(`User ${user} logged in`))
+  .on("logout", (user) => console.log(`User ${user} logout`))
   .on("message", async (msg: Message) => {
     console.log(`Message: ${msg}`);
     switch (msg.text()) {
@@ -29,7 +30,7 @@ bot
         handleEn(msg);
         break;
       case "weather":
-        handleWeather(msg);
+        handleWeather(msg, "today");
         break;
       case "fund":
         handleFund(msg);
@@ -70,8 +71,7 @@ async function handleEn(msg: Message) {
 
   msg.say(`${en}\n${zh}`);
 }
-
-async function handleWeather(msg?: Message) {
+async function handleWeather(msg?: Message, type?: "today" | "tomorrow") {
   // {
   //   "area": "西湖",
   //   "date": "2021-10-10",
@@ -96,66 +96,73 @@ async function handleWeather(msg?: Message) {
   //   "humidity": "94",
   //   "tips": "天气炎热，适宜着短衫、短裙、短裤、薄型T恤衫、敞领短袖棉衫等夏季服装。雨天外出请注意携带雨具，并注意安全。"
   // },
+  const isToady = type === "today";
   const url = `http://api.tianapi.com/txapi/tianqi/index?key=${config.tianXingKey}&city=%E8%A5%BF%E6%B9%96%E5%8C%BA`;
   const res: any = await axios.get(url);
-  const { area, weather, highest, lowest, windsc, tips } = res.data.newslist[0];
+  const { area, weather, highest, lowest, windsc, tips } =
+    res.data.newslist[isToady ? 0 : 1];
   console.log(res);
-  const text = `今日${area}区天气${weather} 最高气温:${highest} 最低气温:${lowest} 风力:${windsc}\n${tips}`;
+  const text = `${
+    isToady ? "今日" : "明日"
+  }${area}区天气${weather}\n最高气温:${highest}\n最低气温:${lowest}\n风力:${windsc}\n${tips}`;
 
-  sendMsg(text,msg)
+  sendMsg(text, msg);
 }
 
 async function handleFund(msg?: Message) {
-
   const fundCodeList = [
-    '005609', // 富国军工主题混合A
-    '002190', // 农银新能源主题
-    '004746', // 易方达上证50
-    '001631', // 天弘中证食品饮料A
-    '161725', // 招商中证白酒A
-    '320007', // 诺安成长混合
-    '003095', // 中欧医疗混合
-    '008099', // 广发价值领先混合A
-    '005827', // 易方达蓝筹混合
-    '166002', // 中欧新蓝筹A
-    '163406', // 兴全合润混合 
-    '000083', // 汇添富消费行业混合
-    '001874', // 前海开源沪港深价值精选
-    '001182', // 易方达安心回馈混合
-    '004241', // 中欧时代先锋C
+    "005609", // 富国军工主题混合A
+    "002190", // 农银新能源主题
+    "004746", // 易方达上证50
+    "001631", // 天弘中证食品饮料A
+    "161725", // 招商中证白酒A
+    "320007", // 诺安成长混合
+    "003095", // 中欧医疗混合
+    "008099", // 广发价值领先混合A
+    "005827", // 易方达蓝筹混合
+    "166002", // 中欧新蓝筹A
+    "163406", // 兴全合润混合
+    "000083", // 汇添富消费行业混合
+    "001874", // 前海开源沪港深价值精选
+    "001182", // 易方达安心回馈混合
+    "004241", // 中欧时代先锋C
   ];
 
-  const res:any = await axios.get(` https://fundmobapi.eastmoney.com/FundMNewApi/FundMNFInfo?pageIndex=1&pageSize=100&appType=ttjj&product=EFund&plat=Android&deviceid=9e16077fca2fcr78ep0ltn98&Version=1&Fcodes=${fundCodeList.join(',')}`)
- 
-  const fundText = res.data.Datas.map((item:any)=>{
-    return `${item.SHORTNAME} ${item.GSZZL.includes('-')?'💚':'❤️'} ${item.GSZZL}`
-  }).join('\n')
+  const res: any = await axios.get(
+    ` https://fundmobapi.eastmoney.com/FundMNewApi/FundMNFInfo?pageIndex=1&pageSize=100&appType=ttjj&product=EFund&plat=Android&deviceid=9e16077fca2fcr78ep0ltn98&Version=1&Fcodes=${fundCodeList.join(
+      ","
+    )}`
+  );
 
-  sendMsg(fundText,msg)
+  const fundText = res.data.Datas.map((item: any) => {
+    return `${item.SHORTNAME} ${item.GSZZL.includes("-") ? "💚" : "❤️"} ${
+      item.GSZZL
+    }`;
+  }).join("\n");
 
+  sendMsg(fundText, msg);
 }
 
-async function sendMsg(text:string, msg?: Message) {
-  if(msg){
+async function sendMsg(text: string, msg?: Message) {
+  if (msg) {
     msg.say(text);
-  }else {
+  } else {
     const room: any = await bot.Room.find({ topic: "801" });
     await room.say(text);
   }
 }
 
 async function main() {
+  schedule.scheduleJob("0 30 23 * * ?", async () => {
+    console.log("天气" + new Date());
 
-  schedule.scheduleJob('0 30 23 * * ?',()=>{
-    console.log('天气'+ new Date());
-    handleWeather()
-  }); 
+    await handleWeather(undefined, "today");
+  });
 
-  schedule.scheduleJob('0 30 6 * * ?',()=>{
-    console.log('基金' + new Date());
-    handleFund()
-  }); 
-
+  schedule.scheduleJob("0 30 6 * * ?", () => {
+    console.log("基金" + new Date());
+    handleFund();
+  });
 }
 
 main();
