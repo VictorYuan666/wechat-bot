@@ -7,16 +7,25 @@ import config from "./config";
 const bot = new Wechaty();
 
 bot
-  .on("scan", (qrcode: string, status: number) => {
+  .on("scan", async (qrcode: string, status: number) => {
     QRTerminal.generate(qrcode, { small: true });
 
     const qrImgUrl =
       "https://api.qrserver.com/v1/create-qr-code/?data=" +
       encodeURIComponent(qrcode);
     console.log(qrImgUrl);
+    await axios.post(config.dingTalk, {
+      msgtype: "markdown",
+      markdown: {
+        title: "wechat",
+        text: qrImgUrl,
+      },
+    });
   })
   .on("login", (user) => console.log(`User ${user} logged in`))
-  .on("logout", (user) => console.log(`User ${user} logout`))
+  .on("logout", async (user) => {
+    console.log(`User ${user} logout`);
+  })
   .on("message", async (msg: Message) => {
     console.log(`Message: ${msg}`);
     switch (msg.text()) {
