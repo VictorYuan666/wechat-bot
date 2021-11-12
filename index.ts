@@ -4,7 +4,9 @@ import axios from "axios";
 import schedule from "node-schedule";
 import config from "./config";
 import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
 
+dayjs.extend(utc);
 const bot = new Wechaty();
 
 bot
@@ -56,8 +58,8 @@ bot
       default:
         break;
     }
-  });
-// .start();
+  })
+  .start();
 
 async function handleOneAPI(msg: Message) {
   const url = `http://api.tianapi.com/txapi/one/index?key=${config.tianXingKey}`;
@@ -162,10 +164,11 @@ async function sendMsg(text: string, msg?: Message) {
   }
 }
 async function checkIsHoliday() {
-  const date = dayjs().format("YYYY-MM-DD");
+  const date = dayjs.utc().add(8, "hour").format("YYYY-MM-DD");
   const url = `http://api.tianapi.com/txapi/jiejiari/index?key=${config.tianXingKey}&date=${date}`;
   const res: any = await axios.get(url);
   const { isnotwork } = res.data.newslist[0];
+  console.log(isnotwork);
   return isnotwork;
 }
 
