@@ -11,6 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "axios": "^0.23.0",
+    "dayjs": "^1.10.7",
     "esno": "^0.10.1",
     "node-schedule": "^2.0.0",
     "qrcode-terminal": "^0.12.0",

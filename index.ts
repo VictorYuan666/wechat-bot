@@ -3,6 +3,7 @@ import QRTerminal from "qrcode-terminal";
 import axios from "axios";
 import schedule from "node-schedule";
 import config from "./config";
+import dayjs from "dayjs";
 
 const bot = new Wechaty();
 
@@ -55,8 +56,8 @@ bot
       default:
         break;
     }
-  })
-  .start();
+  });
+// .start();
 
 async function handleOneAPI(msg: Message) {
   const url = `http://api.tianapi.com/txapi/one/index?key=${config.tianXingKey}`;
@@ -160,6 +161,13 @@ async function sendMsg(text: string, msg?: Message) {
     await room.say(text);
   }
 }
+async function checkIsHoliday() {
+  const date = dayjs().format("YYYY-MM-DD");
+  const url = `http://api.tianapi.com/txapi/jiejiari/index?key=${config.tianXingKey}&date=${date}`;
+  const res: any = await axios.get(url);
+  const { isnotwork } = res.data.newslist[0];
+  return isnotwork;
+}
 
 async function main() {
   schedule.scheduleJob("0 30 23 * * ?", async () => {
@@ -174,10 +182,14 @@ async function main() {
     await handleWeather(undefined, "tomorrow");
   });
 
-  schedule.scheduleJob("0 30 6 * * ?", () => {
+  schedule.scheduleJob("0 30 6 * * ?", async () => {
     console.log("基金" + new Date());
-    handleFund();
+    const isHoliday = await checkIsHoliday();
+    if (!isHoliday) {
+      handleFund();
+    }
   });
 }
 
 main();
+checkIsHoliday();
