@@ -1,4 +1,4 @@
-import { Wechaty, Message, Contact } from "wechaty";
+import { WechatyBuilder, Message, Contact } from "wechaty";
 import QRTerminal from "qrcode-terminal";
 import axios from "axios";
 import schedule from "node-schedule";
@@ -7,7 +7,9 @@ import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 
 dayjs.extend(utc);
-const bot = new Wechaty();
+const bot = WechatyBuilder.build({
+  puppet: "wechaty-puppet-wechat",
+});
 
 bot
   .on("scan", async (qrcode: string, status: number) => {
