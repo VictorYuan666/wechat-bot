@@ -60,8 +60,12 @@ bot
       default:
         break;
     }
-  })
-  .start();
+  });
+bot.start().catch(async (e) => {
+  console.error("Bot start() fail:", e);
+  await bot.stop();
+  process.exit(-1);
+});
 
 async function handleOneAPI(msg: Message) {
   const url = `http://api.tianapi.com/txapi/one/index?key=${config.tianXingKey}`;
