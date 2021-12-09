@@ -8,6 +8,7 @@ import utc from "dayjs/plugin/utc";
 
 dayjs.extend(utc);
 const bot = WechatyBuilder.build({
+  name: 'example-bot',
   puppet: "wechaty-puppet-wechat",
 });
 
