@@ -4,8 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "esno index.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "esno index.ts"
   },
   "author": "",
   "license": "ISC",
