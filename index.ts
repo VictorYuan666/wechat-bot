@@ -130,6 +130,7 @@ async function handleWeather(msg?: Message, type?: "today" | "tomorrow") {
 
 async function handleFund(msg?: Message) {
   const fundCodeList = [
+    "005669", // 前海开源公用事业股票
     "005609", // 富国军工主题混合A
     "002190", // 农银新能源主题
     "004746", // 易方达上证50
