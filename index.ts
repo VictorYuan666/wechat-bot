@@ -157,7 +157,7 @@ async function handleFund(msg?: Message) {
   );
 
   const fundText = res.data.Datas.map((item: any) => {
-    return `${item.SHORTNAME} ${item.GSZZL.includes("-") ? "💚" : "❤️"} ${
+    return `- ${item.SHORTNAME} ${item.GSZZL.includes("-") ? "💚" : "❤️"} ${
       item.GSZZL
     }`;
   }).join("\n");
