@@ -62,11 +62,11 @@ bot
         break;
     }
   });
-bot.start().catch(async (e) => {
-  console.error("Bot start() fail:", e);
-  await bot.stop();
-  process.exit(-1);
-});
+// bot.start().catch(async (e) => {
+//   console.error("Bot start() fail:", e);
+//   await bot.stop();
+//   process.exit(-1);
+// });
 
 async function handleOneAPI(msg: Message) {
   const url = `http://api.tianapi.com/txapi/one/index?key=${config.tianXingKey}`;
@@ -129,6 +129,8 @@ async function handleWeather(msg?: Message, type?: "today" | "tomorrow") {
 }
 
 async function handleFund(msg?: Message) {
+  const isHoliday = await checkIsHoliday();
+  if (isHoliday) return;
   const fundCodeList = [
     "005669", // 前海开源公用事业股票
     "005609", // 富国军工主题混合A
@@ -149,7 +151,7 @@ async function handleFund(msg?: Message) {
   ];
 
   const res: any = await axios.get(
-    ` https://fundmobapi.eastmoney.com/FundMNewApi/FundMNFInfo?pageIndex=1&pageSize=100&appType=ttjj&product=EFund&plat=Android&deviceid=9e16077fca2fcr78ep0ltn98&Version=1&Fcodes=${fundCodeList.join(
+    `https://fundmobapi.eastmoney.com/FundMNewApi/FundMNFInfo?pageIndex=1&pageSize=100&appType=ttjj&product=EFund&plat=Android&deviceid=9e16077fca2fcr78ep0ltn98&Version=1&Fcodes=${fundCodeList.join(
       ","
     )}`
   );
@@ -160,9 +162,11 @@ async function handleFund(msg?: Message) {
     }`;
   }).join("\n");
 
+  console.log(fundText);
+
   sendDingTalkMessage(fundText);
 
-  sendMsg(fundText, msg);
+  // sendMsg(fundText, msg);
 }
 
 async function sendMsg(text: string, msg?: Message) {
@@ -186,31 +190,28 @@ async function sendDingTalkMessage(text: string) {
   await axios.post(config.dingTalk, {
     msgtype: "markdown",
     markdown: {
-      title: "基金提醒",
+      title: "wechat",
       text,
     },
   });
 }
 
 async function main() {
-  schedule.scheduleJob("0 30 23 * * ?", async () => {
-    //     console.log("天气" + new Date());
+  // schedule.scheduleJob("0 30 23 * * ?", async () => {
 
-    await handleWeather(undefined, "today");
-  });
+  //   await handleWeather(undefined, "today");
+  // });
 
-  schedule.scheduleJob("0 30 10 * * ?", async () => {
-    //     console.log("天气" + new Date());
+  // schedule.scheduleJob("0 30 10 * * ?", async () => {
 
-    await handleWeather(undefined, "tomorrow");
-  });
+  //   await handleWeather(undefined, "tomorrow");
+  // });
 
   schedule.scheduleJob("0 30 6 * * ?", async () => {
-    //     console.log("基金" + new Date());
-    const isHoliday = await checkIsHoliday();
-    if (!isHoliday) {
-      handleFund();
-    }
+    handleFund();
+  });
+  schedule.scheduleJob("0 1 7 * * ?", async () => {
+    handleFund();
   });
 }
 
