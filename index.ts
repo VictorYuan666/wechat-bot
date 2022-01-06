@@ -8,7 +8,7 @@ import utc from "dayjs/plugin/utc";
 
 dayjs.extend(utc);
 const bot = WechatyBuilder.build({
-  name: 'example-bot',
+  name: "example-bot",
   puppet: "wechaty-puppet-wechat",
 });
 
@@ -20,20 +20,20 @@ bot
       "https://api.qrserver.com/v1/create-qr-code/?data=" +
       encodeURIComponent(qrcode);
     console.log(qrImgUrl);
-    await axios.post(config.dingTalk, {
-      msgtype: "markdown",
-      markdown: {
-        title: "wechat",
-        text: qrImgUrl,
-      },
-    });
+    // await axios.post(config.dingTalk, {
+    //   msgtype: "markdown",
+    //   markdown: {
+    //     title: "wechat",
+    //     text: qrImgUrl,
+    //   },
+    // });
   })
   .on("login", (user) => console.log(`User ${user} logged in`))
   .on("logout", async (user) => {
     console.log(`User ${user} logout`);
   })
   .on("message", async (msg: Message) => {
-//     console.log(`Message: ${msg}`);
+    //     console.log(`Message: ${msg}`);
     switch (msg.text()) {
       case "one":
         handleOneAPI(msg);
@@ -120,7 +120,7 @@ async function handleWeather(msg?: Message, type?: "today" | "tomorrow") {
   const res: any = await axios.get(url);
   const { area, weather, highest, lowest, windsc, tips } =
     res.data.newslist[isToady ? 0 : 1];
-//   console.log(res);
+  //   console.log(res);
   const text = `${
     isToady ? "今日" : "明日"
   }${area}区天气${weather}\n最高气温:${highest}\n最低气温:${lowest}\n风力:${windsc}\n${tips}`;
@@ -160,6 +160,8 @@ async function handleFund(msg?: Message) {
     }`;
   }).join("\n");
 
+  sendDingTalkMessage(fundText);
+
   sendMsg(fundText, msg);
 }
 
@@ -176,25 +178,35 @@ async function checkIsHoliday() {
   const url = `http://api.tianapi.com/txapi/jiejiari/index?key=${config.tianXingKey}&date=${date}`;
   const res: any = await axios.get(url);
   const { isnotwork } = res.data.newslist[0];
-//   console.log(isnotwork);
+  //   console.log(isnotwork);
   return isnotwork;
+}
+
+async function sendDingTalkMessage(text: string) {
+  await axios.post(config.dingTalk, {
+    msgtype: "markdown",
+    markdown: {
+      title: "基金提醒",
+      text,
+    },
+  });
 }
 
 async function main() {
   schedule.scheduleJob("0 30 23 * * ?", async () => {
-//     console.log("天气" + new Date());
+    //     console.log("天气" + new Date());
 
     await handleWeather(undefined, "today");
   });
 
   schedule.scheduleJob("0 30 10 * * ?", async () => {
-//     console.log("天气" + new Date());
+    //     console.log("天气" + new Date());
 
     await handleWeather(undefined, "tomorrow");
   });
 
   schedule.scheduleJob("0 30 6 * * ?", async () => {
-//     console.log("基金" + new Date());
+    //     console.log("基金" + new Date());
     const isHoliday = await checkIsHoliday();
     if (!isHoliday) {
       handleFund();
